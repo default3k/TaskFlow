@@ -1,0 +1,37 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Удаление компании{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto; border-color: #ef4444;">
+    <h1 style="color: #ef4444; margin-bottom: 20px;">⚠️ Удаление компании</h1>
+    
+    <p style="margin-bottom: 20px;">
+        Вы уверены, что хотите удалить компанию <strong>"{{ company.name }}"</strong>?
+    </p>
+    
+    <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+        <p style="color: #991b1b; margin: 0;">
+            <strong>ВНИМАНИЕ!</strong> Это действие нельзя отменить. Будут удалены:
+        </p>
+        <ul style="color: #991b1b; margin-top: 10px; margin-bottom: 0;">
+            <li>Все проекты компании</li>
+            <li>Все задачи компании</li>
+            <li>Все сотрудники будут откреплены</li>
+            <li>Вся информация о компании</li>
+        </ul>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div style="display: flex; gap: 10px;">
+            <a href="{% url 'company_members' %}" class="btn btn-outline" style="flex: 1; text-align: center;">
+                Отмена
+            </a>
+            <button type="submit" class="btn btn-danger" style="flex: 1;">
+                🗑️ Да, удалить компанию
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

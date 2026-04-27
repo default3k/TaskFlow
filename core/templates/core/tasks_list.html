@@ -1,0 +1,42 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Задачи{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+    <h1>Задачи</h1>
+    <a href="{% url 'task_create' %}" class="btn btn-primary">+ Создать</a>
+</div>
+
+<div class="card" style="margin-bottom: 20px;">
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="{% url 'tasks_list' %}" class="btn btn-outline btn-sm">Все</a>
+        <a href="{% url 'tasks_list' %}?status=waiting" class="btn btn-outline btn-sm">Ожидают</a>
+        <a href="{% url 'tasks_list' %}?status=in_progress" class="btn btn-outline btn-sm">В работе</a>
+        <a href="{% url 'tasks_list' %}?status=review" class="btn btn-outline btn-sm">На проверке</a>
+        <a href="{% url 'tasks_list' %}?status=done" class="btn btn-outline btn-sm">Выполнены</a>
+        <a href="{% url 'tasks_list' %}?assigned=me" class="btn btn-outline btn-sm">Мои</a>
+    </div>
+</div>
+
+<div class="tasks-grid">
+    {% for task in tasks %}
+    <a href="{% url 'task_detail' task.id %}" class="task-card">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <strong>{{ task.title }}</strong>
+            <span class="priority-{{ task.priority }} status-badge">{{ task.get_priority_display }}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span class="status-badge status-{{ task.status }}">{{ task.get_status_display }}</span>
+            {% if task.assigned_to %}
+            <small class="text-secondary">{{ task.assigned_to.username }}</small>
+            {% endif %}
+        </div>
+    </a>
+    {% empty %}
+    <div class="card text-center">
+        <p class="text-secondary">Нет задач</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

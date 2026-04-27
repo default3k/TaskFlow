@@ -1,0 +1,91 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ task.title }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'tasks_list' %}" class="text-secondary" style="text-decoration: none;">← Назад к задачам</a>
+</div>
+
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
+        <h1>{{ task.title }}</h1>
+        <span class="priority-{{ task.priority }} status-badge" style="padding: 6px 12px;">{{ task.get_priority_display }}</span>
+    </div>
+    
+    {% if task.description %}
+    <div style="margin-bottom: 20px;">
+        <h3 style="font-size: 14px; color: #a1a1aa; margin-bottom: 8px;">Описание</h3>
+        <p>{{ task.description }}</p>
+    </div>
+    {% endif %}
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; padding-top: 20px; border-top: 1px solid #27272a;">
+        <div>
+            <div style="font-size: 12px; color: #a1a1aa;">Статус</div>
+            <div class="status-badge status-{{ task.status }}" style="margin-top: 4px;">{{ task.get_status_display }}</div>
+        </div>
+        <div>
+            <div style="font-size: 12px; color: #a1a1aa;">Исполнитель</div>
+            <div style="margin-top: 4px;">{{ task.assigned_to.username|default:"Не назначен" }}</div>
+        </div>
+        <div>
+            <div style="font-size: 12px; color: #a1a1aa;">Создал</div>
+            <div style="margin-top: 4px;">{{ task.created_by.username }}</div>
+        </div>
+        {% if task.project %}
+        <div>
+            <div style="font-size: 12px; color: #a1a1aa;">Проект</div>
+            <div style="margin-top: 4px;">
+                <a href="{% url 'project_detail' task.project.id %}" style="color: #3b82f6;">{{ task.project.name }}</a>
+            </div>
+        </div>
+        {% endif %}
+        <div>
+            <div style="font-size: 12px; color: #a1a1aa;">Создана</div>
+            <div style="margin-top: 4px;">{{ task.created_at|date:"d.m.Y H:i" }}</div>
+        </div>
+        {% if task.deadline %}
+        <div>
+            <div style="font-size: 12px; color: #a1a1aa;">Срок</div>
+            <div style="margin-top: 4px;">{{ task.deadline|date:"d.m.Y H:i" }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Изменение статуса -->
+{% if user == task.assigned_to or user.can_change_any_status %}
+<div class="card">
+    <h2 class="card-title" style="margin-bottom: 15px;">Изменить статус</h2>
+    <form method="post" action="{% url 'task_update_status' task.id %}" style="margin-bottom: 0;">
+        {% csrf_token %}
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <select name="status" class="form-select" style="flex: 1;">
+                <option value="waiting" {% if task.status == 'waiting' %}selected{% endif %}>⏳ Ожидает</option>
+                <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>🔄 В работе</option>
+                <option value="review" {% if task.status == 'review' %}selected{% endif %}>👀 На проверке</option>
+                <option value="done" {% if task.status == 'done' %}selected{% endif %}>✅ Выполнено</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Обновить статус</button>
+            {% if user.can_delete_tasks %}
+            <button type="button" class="btn" style="background: #ef4444; color: white; border: none; cursor: pointer; padding: 8px 20px; border-radius: 8px; font-size: 14px;" onclick="if(confirm('Точно удалить задачу «{{ task.title }}»?')) { window.location.href='{% url 'task_delete' task.id %}'; }">
+                🗑️ Удалить
+            </button>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+    {% if task.status == 'review' and user.can_change_any_status %}
+    <div class="card">
+        <form method="post" action="{% url 'task_update_status' task.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="status" value="done">
+            <button type="submit" class="btn btn-primary" style="background: #10b981;">✅ Подтвердить выполнение</button>
+        </form>
+    </div>
+    {% endif %}
+{% endif %}
+
+{% endblock %}

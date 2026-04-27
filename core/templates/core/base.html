@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow - {% block title %}Управление задачами{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0f;
+            color: #ffffff;
+            line-height: 1.5;
+        }
+        
+        /* Навигация */
+        .navbar {
+            background: #111114;
+            border-bottom: 1px solid #27272a;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+        
+        .nav-brand a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .nav-menu a {
+            color: #a1a1aa;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+        
+        .nav-menu a:hover {
+            color: white;
+        }
+        
+        /* Кнопки */
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-outline {
+            border: 1px solid #27272a;
+            color: #a1a1aa;
+            background: transparent;
+        }
+        
+        .btn-outline:hover {
+            border-color: #3b82f6;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 0.75rem;
+        }
+        
+        /* Карточки */
+        .card {
+            background: #13131a;
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        /* Формы */
+        .form-container {
+            max-width: 500px;
+            margin: 40px auto;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.875rem;
+            color: #a1a1aa;
+        }
+        
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 10px;
+            background: #1e1e26;
+            border: 1px solid #27272a;
+            border-radius: 6px;
+            color: white;
+            font-size: 0.875rem;
+        }
+        
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        /* Статистика */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: #13131a;
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            color: #a1a1aa;
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+        
+        /* Задачи */
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        
+        .task-card {
+            background: #13131a;
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 15px;
+            text-decoration: none;
+            color: white;
+            display: block;
+        }
+        
+        .task-card:hover {
+            border-color: #3b82f6;
+        }
+        
+        /* Статусы */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+        
+        .status-waiting { background: rgba(113, 113, 122, 0.2); color: #a1a1aa; }
+        .status-in_progress { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .status-review { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .status-done { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        
+        .priority-high { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .priority-medium { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .priority-low { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        
+        /* Сообщения */
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        
+        .alert-success { background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; color: #10b981; }
+        .alert-error { background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; }
+        .alert-warning { background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; color: #f59e0b; }
+        
+        /* Основной контент */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Grid */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+        
+        /* Прочее */
+        .text-center { text-align: center; }
+        .mt-2 { margin-top: 20px; }
+        .mb-2 { margin-bottom: 20px; }
+        .text-secondary { color: #a1a1aa; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="{% url 'dashboard' %}">TaskFlow</a>
+            </div>
+            {% if user.is_authenticated %}
+            <div class="nav-menu">
+                <a href="{% url 'dashboard' %}">Дашборд</a>
+                {% if user.company %}
+                <a href="{% url 'tasks_list' %}">Задачи</a>
+                <a href="{% url 'task_create' %}">Создать задачу</a>
+                {% if user.can_manage_company %}
+                <a href="{% url 'company_members' %}">Управление</a>
+                <a href="{% url 'company_requests_manage' %}">Заявки</a>
+                {% endif %}
+                {% endif %}
+                <span style="color: #3b82f6;">{{ user.username }}</span>
+                {% if user.company %}
+                <span style="color: #a1a1aa;">| {{ user.company.name }}</span>
+                    {% if user.role != 'owner' %}
+                    <a href="{% url 'company_leave' %}" style="color: #ef4444;" onclick="return confirm('Выйти из компании {{ user.company.name }}?')">🚪 Выйти</a>
+                    {% endif %}
+                {% endif %}
+                <a href="{% url 'logout' %}" style="color: #ef4444;">Выйти</a>
+            </div>
+            {% endif %} 
+        </div>
+    </nav>
+    
+    {% if messages %}
+    <div style="max-width: 1200px; margin: 20px auto 0; padding: 0 20px;">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <script>
+        // Авто-скрытие сообщений через 3 секунды
+        setTimeout(function() { 
+            document.querySelectorAll('.alert').forEach(function(alert) {
+                alert.style.opacity = '0';
+                setTimeout(function() { alert.remove(); }, 300);
+            });
+        }, 3000);
+    </script>
+</body>
+</html>

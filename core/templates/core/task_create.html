@@ -1,0 +1,53 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Создать задачу{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="card">
+        <h1>Создать задачу</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">Название *</label>
+                <input type="text" name="title" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Описание</label>
+                <textarea name="description" class="form-textarea" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Приоритет</label>
+                <select name="priority" class="form-select">
+                    <option value="low">🟢 Низкий</option>
+                    <option value="medium" selected>🟡 Средний</option>
+                    <option value="high">🔴 Высокий</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Проект</label>
+                <select name="project" class="form-select">
+                    <option value="">Без проекта</option>
+                    {% for project in form.fields.project.queryset %}
+                    <option value="{{ project.id }}">{{ project.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Исполнитель</label>
+                <select name="assigned_to" class="form-select">
+                    <option value="">Не назначен</option>
+                    {% for user in form.fields.assigned_to.queryset %}
+                    <option value="{{ user.id }}">{{ user.username }} ({{ user.get_role_display }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Срок выполнения</label>
+                <input type="datetime-local" name="deadline" class="form-input">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Создать задачу</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

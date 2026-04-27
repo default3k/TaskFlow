@@ -1,0 +1,159 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Дашборд{% endblock %}
+
+{% block content %}
+{% if user.company %}
+    <!-- Пользователь уже в компании -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ tasks_total|default:0 }}</div>
+            <div class="stat-label">Всего задач</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ tasks_in_progress|default:0 }}</div>
+            <div class="stat-label">В работе</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ tasks_review|default:0 }}</div>
+            <div class="stat-label">На проверке</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ tasks_done|default:0 }}</div>
+            <div class="stat-label">Выполнено</div>
+        </div>
+    </div>
+    
+    <!-- Управление компанией для админов -->
+    {% if user.can_manage_company %}
+    <div class="card" style="margin-bottom: 20px;">
+        <div class="card-header">
+            <h2 class="card-title">⚙️ Управление компанией</h2>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="{% url 'company_members' %}" class="btn btn-outline">👥 Сотрудники</a>
+            <a href="{% url 'company_edit' %}" class="btn btn-outline">✏️ Редактировать</a>
+            {% if user.can_manage_company %}
+            <a href="{% url 'company_delete' %}" class="btn btn-danger" onclick="return confirm('⚠️ ВНИМАНИЕ! Это удалит ВСЮ компанию безвозвратно. Вы уверены?')">🗑️ Удалить компанию</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="grid-2">
+        <!-- Мои задачи -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">📋 Мои задачи</h2>
+                <a href="{% url 'tasks_list' %}?assigned=me" class="btn btn-outline btn-sm">Все →</a>
+            </div>
+            {% if my_tasks %}
+                {% for task in my_tasks %}
+                <a href="{% url 'task_detail' task.id %}" class="task-card" style="margin-bottom: 10px; display: block;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>{{ task.title }}</strong>
+                            <div style="font-size: 12px; color: #a1a1aa; margin-top: 4px;">
+                                {{ task.created_at|date:"d.m.Y" }}
+                            </div>
+                        </div>
+                        <span class="status-badge status-{{ task.status }}">{{ task.get_status_display }}</span>
+                    </div>
+                </a>
+                {% endfor %}
+            {% else %}
+                <p class="text-secondary" style="text-align: center; padding: 40px;">Нет назначенных задач</p>
+            {% endif %}
+        </div>
+        
+        <!-- Проекты -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">🎯 Проекты</h2>
+                <a href="{% url 'project_create' %}" class="btn btn-primary btn-sm">+ Создать</a>
+            </div>
+            {% if projects %}
+                {% for project in projects %}
+                <a href="{% url 'project_detail' project.id %}" class="task-card" style="margin-bottom: 10px; display: block;">
+                    <div style="margin-bottom: 8px;">
+                        <strong>{{ project.name }}</strong>
+                    </div>
+                    <div style="background: #1e1e26; border-radius: 4px; overflow: hidden;">
+                        <div style="width: {{ project.get_progress }}%; height: 4px; background: #3b82f6;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #a1a1aa;">
+                        <span>{{ project.tasks.count }} задач</span>
+                        <span>{{ project.get_progress }}%</span>
+                    </div>
+                </a>
+                {% endfor %}
+            {% else %}
+                <p class="text-secondary" style="text-align: center; padding: 40px;">Нет проектов</p>
+            {% endif %}
+        </div>
+    </div>
+    
+{% else %}
+    <!-- Пользователь без компании - показываем компании для вступления -->
+    <div class="card text-center" style="margin-bottom: 20px;">
+        <h1>Добро пожаловать в TaskFlow!</h1>
+        <p class="text-secondary" style="margin: 20px 0;">
+            Вы еще не состоите в компании. Создайте свою или подайте заявку в существующую.
+        </p>
+        <a href="{% url 'company_create' %}" class="btn btn-primary">Создать компанию</a>
+    </div>
+    
+    <!-- Список существующих компаний -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">🏢 Существующие компании</h2>
+        </div>
+        
+        {% if available_companies %}
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                {% for company in available_companies %}
+                <div style="padding: 15px; background: #1e1e26; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="font-size: 16px;">{{ company.name }}</strong>
+                        {% if company.description %}
+                        <p style="color: #a1a1aa; font-size: 14px; margin-top: 5px;">{{ company.description|truncatechars:100 }}</p>
+                        {% endif %}
+                        <div style="font-size: 12px; color: #71717a; margin-top: 5px;">
+                            Сотрудников: {{ company.employees.count }} | Создана: {{ company.created_at|date:"d.m.Y" }}
+                        </div>
+                    </div>
+                    <a href="{% url 'company_join' company.id %}" class="btn btn-primary">Подать заявку</a>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center" style="padding: 40px;">
+                <p class="text-secondary">Нет доступных компаний для вступления</p>
+                <a href="{% url 'company_create' %}" class="btn btn-outline" style="margin-top: 10px;">Создать первую компанию</a>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Мои заявки -->
+    {% if my_requests %}
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">📝 Мои заявки</h2>
+        </div>
+        {% for req in my_requests %}
+        <div style="padding: 12px; background: #1e1e26; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong>{{ req.company.name }}</strong>
+                <div style="font-size: 12px; color: #a1a1aa;">{{ req.created_at|date:"d.m.Y H:i" }}</div>
+            </div>
+            <span class="status-badge status-{{ req.status }}">
+                {% if req.status == 'pending' %}⏳ На рассмотрении
+                {% elif req.status == 'approved' %}✅ Одобрена
+                {% else %}❌ Отклонена{% endif %}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endif %}
+{% endblock %}

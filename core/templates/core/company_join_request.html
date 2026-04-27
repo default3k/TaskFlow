@@ -1,0 +1,30 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Заявка в компанию{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title">Заявка в компанию "{{ company.name }}"</h1>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">Сопроводительное сообщение</label>
+                <textarea name="message" class="form-textarea" rows="5" placeholder="Расскажите о себе, своем опыте и почему хотите работать в этой компании..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Отправить заявку</button>
+            </div>
+        </form>
+        
+        <div style="text-align: center; margin-top: 1rem;">
+            <a href="{% url 'dashboard' %}" style="color: #a1a1aa; text-decoration: none;">← Вернуться</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ title }} | TaskFlow{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title">{{ title }}</h1>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">Название проекта</label>
+                <input type="text" name="name" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Описание</label>
+                <textarea name="description" class="form-textarea" rows="3"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Срок выполнения</label>
+                <input type="datetime-local" name="deadline" class="form-input">
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Создать проект</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
