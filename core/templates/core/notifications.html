@@ -1,0 +1,43 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Уведомления{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>🔔 Уведомления</h1>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="mark_all_read" class="btn btn-outline btn-sm">Отметить все прочитанными</button>
+        </form>
+    </div>
+    
+    <div class="card">
+        {% if notifications %}
+            {% for notif in notifications %}
+            <div style="padding: 15px; border-bottom: 1px solid #27272a; {% if not notif.is_read %}background: rgba(59,130,246,0.05);{% endif %}">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <div style="font-weight: {% if not notif.is_read %}bold{% endif %}; margin-bottom: 5px;">
+                            {{ notif.message }}
+                        </div>
+                        <small class="text-secondary">{{ notif.created_at|date:"d.m.Y H:i" }}</small>
+                    </div>
+                    {% if not notif.is_read %}
+                    <form method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="mark_read" value="{{ notif.id }}">
+                        <button type="submit" class="btn btn-outline btn-sm">Прочитано</button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% if notif.link %}
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-secondary" style="text-align: center; padding: 40px;">У вас нет уведомлений</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

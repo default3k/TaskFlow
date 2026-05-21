@@ -24,6 +24,32 @@
         </div>
     </div>
     
+    <!-- Детальная статистика -->
+    <div class="card">
+        <h2 class="card-title" style="margin-bottom: 15px;">📈 Детальная статистика</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <div>
+                <div style="font-size: 12px; color: #a1a1aa;">✅ Выполнено задач</div>
+                <div style="font-size: 28px; font-weight: bold; color: #10b981;">{{ tasks_done|default:0 }}</div>
+            </div>
+            <div>
+                <div style="font-size: 12px; color: #a1a1aa;">🔄 В работе</div>
+                <div style="font-size: 28px; font-weight: bold; color: #f59e0b;">{{ tasks_in_progress|default:0 }}</div>
+            </div>
+            <div>
+                <div style="font-size: 12px; color: #a1a1aa;">👀 На проверке</div>
+                <div style="font-size: 28px; font-weight: bold; color: #8b5cf6;">{{ tasks_review|default:0 }}</div>
+            </div>
+            <div>
+                <div style="font-size: 12px; color: #a1a1aa;">⏳ Ожидают</div>
+                <div style="font-size: 28px; font-weight: bold; color: #6b7280;">{{ tasks_waiting|default:0 }}</div>
+            </div>
+        </div>
+        <div class="text-secondary" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #27272a; font-size: 12px;">
+            💡 Совет: Используйте фильтры на странице задач для более детального анализа
+        </div>
+    </div>
+    
     <!-- Управление компанией для админов -->
     {% if user.can_manage_company %}
     <div class="card" style="margin-bottom: 20px;">
@@ -33,9 +59,7 @@
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <a href="{% url 'company_members' %}" class="btn btn-outline">👥 Сотрудники</a>
             <a href="{% url 'company_edit' %}" class="btn btn-outline">✏️ Редактировать</a>
-            {% if user.can_manage_company %}
             <a href="{% url 'company_delete' %}" class="btn btn-danger" onclick="return confirm('⚠️ ВНИМАНИЕ! Это удалит ВСЮ компанию безвозвратно. Вы уверены?')">🗑️ Удалить компанию</a>
-            {% endif %}
         </div>
     </div>
     {% endif %}

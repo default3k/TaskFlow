@@ -1,0 +1,80 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Мой профиль{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>Мой профиль</h1>
+        <a href="{% url 'profile_edit' %}" class="btn btn-primary">✏️ Редактировать</a>
+    </div>
+    
+    <div class="card">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="width: 80px; height: 80px; background: #3b82f6; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 32px; color: white;">
+                {{ user.username|first|upper }}
+            </div>
+            <h2 style="margin-top: 10px;">{{ user.username }}</h2>
+            <span class="status-badge" style="background: rgba(59,130,246,0.2); color: #3b82f6;">
+                {{ user.get_role_display }}
+            </span>
+        </div>
+        
+        <div style="border-top: 1px solid #27272a; padding-top: 20px;">
+            <div style="display: grid; gap: 15px;">
+                <div>
+                    <div style="font-size: 12px; color: #a1a1aa;">Имя пользователя</div>
+                    <div style="font-size: 16px;">{{ user.username }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: #a1a1aa;">Email</div>
+                    <div style="font-size: 16px;">{{ user.email|default:"Не указан" }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: #a1a1aa;">Телефон</div>
+                    <div style="font-size: 16px;">{{ user.phone|default:"Не указан" }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: #a1a1aa;">Должность</div>
+                    <div style="font-size: 16px;">{{ user.position|default:"Не указана" }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: #a1a1aa;">Компания</div>
+                    <div style="font-size: 16px;">{{ user.company.name|default:"Не состоите в компании" }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: #a1a1aa;">Дата регистрации</div>
+                    <div style="font-size: 16px;">{{ user.date_joined|date:"d.m.Y H:i" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Статистика -->
+    {% if user.company %}
+    <div class="card">
+        <h3 class="card-title">📊 Моя статистика</h3>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
+            <div style="text-align: center;">
+                <div style="font-size: 24px; font-weight: bold;">{{ tasks_total }}</div>
+                <div style="font-size: 12px; color: #a1a1aa;">Всего задач</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 24px; font-weight: bold; color: #10b981;">{{ tasks_done }}</div>
+                <div style="font-size: 12px; color: #a1a1aa;">Выполнено</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 24px; font-weight: bold; color: #f59e0b;">{{ tasks_in_progress }}</div>
+                <div style="font-size: 12px; color: #a1a1aa;">В работе</div>
+            </div>
+        </div>
+        {% if total_time > 0 %}
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #27272a; text-align: center;">
+            <div style="font-size: 12px; color: #a1a1aa;">⏱️ Общее время работы над задачами</div>
+            <div style="font-size: 20px; font-weight: bold;">{{ total_time }} часов</div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

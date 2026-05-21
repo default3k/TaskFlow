@@ -60,6 +60,59 @@
             color: white;
         }
         
+        /* Dropdown menu */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            color: #a1a1aa;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+        
+        .dropdown-toggle:hover {
+            color: white;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #1e1e26;
+            border: 1px solid #27272a;
+            border-radius: 8px;
+            min-width: 150px;
+            display: none;
+            z-index: 100;
+        }
+        
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        
+        .dropdown-menu a {
+            display: block;
+            padding: 10px;
+            color: #a1a1aa;
+            text-decoration: none;
+        }
+        
+        .dropdown-menu a:hover {
+            background: #27272a;
+            color: white;
+        }
+        
+        .dropdown-menu hr {
+            margin: 5px 0;
+            border-color: #27272a;
+        }
+        
         /* Кнопки */
         .btn {
             display: inline-block;
@@ -282,16 +335,28 @@
                 <a href="{% url 'company_requests_manage' %}">Заявки</a>
                 {% endif %}
                 {% endif %}
-                <span style="color: #3b82f6;">{{ user.username }}</span>
-                {% if user.company %}
-                <span style="color: #a1a1aa;">| {{ user.company.name }}</span>
-                    {% if user.role != 'owner' %}
-                    <a href="{% url 'company_leave' %}" style="color: #ef4444;" onclick="return confirm('Выйти из компании {{ user.company.name }}?')">🚪 Выйти</a>
+                <a href="{% url 'notifications' %}" style="position: relative; display: inline-block;">
+                <a href="{% url 'notifications' %}" style="position: relative; display: inline-block;">
+                    🔔 Уведомления
+                    {% if unread_count > 0 %}
+                    <span style="position: absolute; top: -8px; right: -15px; background: #ef4444; color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 10px;">
+                        {{ unread_count }}
+                    </span>
                     {% endif %}
-                {% endif %}
-                <a href="{% url 'logout' %}" style="color: #ef4444;">Выйти</a>
+                </a>
+                <div class="dropdown">
+                    <a href="#" class="dropdown-toggle">
+                        👤 {{ user.username }}
+                        <span style="font-size: 10px;">▼</span>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="{% url 'profile' %}">👤 Мой профиль</a>
+                        <hr>
+                        <a href="{% url 'logout' %}" style="color: #ef4444;">🚪 Выйти</a>
+                    </div>
+                </div>
             </div>
-            {% endif %} 
+            {% endif %}
         </div>
     </nav>
     

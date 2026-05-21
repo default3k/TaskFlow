@@ -3,20 +3,94 @@
 {% block title %}Задачи{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
     <h1>Задачи</h1>
-    <a href="{% url 'task_create' %}" class="btn btn-primary">+ Создать</a>
+    <div style="display: flex; gap: 10px;">
+        <a href="{% url 'task_create' %}" class="btn btn-primary">+ Создать задачу</a>
+        <a href="{% url 'tasks_export' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="btn btn-outline">📊 Экспорт в Excel</a>
+    </div>
 </div>
 
+<!-- ПОИСК -->
 <div class="card" style="margin-bottom: 20px;">
-    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <a href="{% url 'tasks_list' %}" class="btn btn-outline btn-sm">Все</a>
-        <a href="{% url 'tasks_list' %}?status=waiting" class="btn btn-outline btn-sm">Ожидают</a>
-        <a href="{% url 'tasks_list' %}?status=in_progress" class="btn btn-outline btn-sm">В работе</a>
-        <a href="{% url 'tasks_list' %}?status=review" class="btn btn-outline btn-sm">На проверке</a>
-        <a href="{% url 'tasks_list' %}?status=done" class="btn btn-outline btn-sm">Выполнены</a>
-        <a href="{% url 'tasks_list' %}?assigned=me" class="btn btn-outline btn-sm">Мои</a>
-    </div>
+    <form method="get" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <input type="text" name="search" placeholder="🔍 Поиск по названию или описанию..." 
+               class="form-input" style="flex: 2;" value="{{ search_query }}">
+        <button type="submit" class="btn btn-primary">Найти</button>
+        {% if search_query or status_filter or priority_filter or assigned_filter or project_filter or sort_by != '-created_at' %}
+        <a href="{% url 'tasks_list' %}" class="btn btn-outline">Сбросить все</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- ФИЛЬТРЫ И СОРТИРОВКА -->
+<div class="card" style="margin-bottom: 20px;">
+    <form method="get" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
+        {% if search_query %}
+        <input type="hidden" name="search" value="{{ search_query }}">
+        {% endif %}
+        
+        <div>
+            <label class="form-label">Статус</label>
+            <select name="status" class="form-select" onchange="this.form.submit()">
+                <option value="">Все статусы</option>
+                <option value="waiting" {% if status_filter == 'waiting' %}selected{% endif %}>⏳ Ожидает</option>
+                <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>🔄 В работе</option>
+                <option value="review" {% if status_filter == 'review' %}selected{% endif %}>👀 На проверке</option>
+                <option value="done" {% if status_filter == 'done' %}selected{% endif %}>✅ Выполнено</option>
+            </select>
+        </div>
+        
+        <div>
+            <label class="form-label">Приоритет</label>
+            <select name="priority" class="form-select" onchange="this.form.submit()">
+                <option value="">Все приоритеты</option>
+                <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>🟢 Низкий</option>
+                <option value="medium" {% if priority_filter == 'medium' %}selected{% endif %}>🟡 Средний</option>
+                <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>🟠 Высокий</option>
+                <option value="urgent" {% if priority_filter == 'urgent' %}selected{% endif %}>🔴 Срочный</option>
+            </select>
+        </div>
+        
+        <div>
+            <label class="form-label">Исполнитель</label>
+            <select name="assigned" class="form-select" onchange="this.form.submit()">
+                <option value="">Все задачи</option>
+                <option value="me" {% if assigned_filter == 'me' %}selected{% endif %}>👤 Мои задачи</option>
+                <option value="unassigned" {% if assigned_filter == 'unassigned' %}selected{% endif %}>❌ Без исполнителя</option>
+            </select>
+        </div>
+        
+        <div>
+            <label class="form-label">Проект</label>
+            <select name="project" class="form-select" onchange="this.form.submit()">
+                <option value="">Все проекты</option>
+                {% for project in projects %}
+                <option value="{{ project.id }}" {% if project_filter|stringformat:"s" == project.id|stringformat:"s" %}selected{% endif %}>
+                    📁 {{ project.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div>
+            <label class="form-label">Сортировка</label>
+            <select name="sort" class="form-select" onchange="this.form.submit()">
+                <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>📅 Новые сначала</option>
+                <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>📅 Старые сначала</option>
+                <option value="-deadline" {% if sort_by == '-deadline' %}selected{% endif %}>⏰ Срок (ближайшие)</option>
+                <option value="deadline" {% if sort_by == 'deadline' %}selected{% endif %}>⏰ Срок (дальние)</option>
+                <option value="title" {% if sort_by == 'title' %}selected{% endif %}>📝 Название (А-Я)</option>
+                <option value="-title" {% if sort_by == '-title' %}selected{% endif %}>📝 Название (Я-А)</option>
+                <option value="priority" {% if sort_by == 'priority' %}selected{% endif %}>⭐ Приоритет (возрастание)</option>
+                <option value="-priority" {% if sort_by == '-priority' %}selected{% endif %}>⭐ Приоритет (убывание)</option>
+            </select>
+        </div>
+    </form>
+</div>
+
+<div style="margin-bottom: 15px;">
+    <span class="text-secondary">Найдено задач: {{ tasks.count }}</span>
 </div>
 
 <div class="tasks-grid">
@@ -26,16 +100,31 @@
             <strong>{{ task.title }}</strong>
             <span class="priority-{{ task.priority }} status-badge">{{ task.get_priority_display }}</span>
         </div>
-        <div style="display: flex; justify-content: space-between;">
+        <div style="font-size: 12px; color: #a1a1aa; margin-bottom: 8px;">
+            {{ task.description|truncatechars:80 }}
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
             <span class="status-badge status-{{ task.status }}">{{ task.get_status_display }}</span>
             {% if task.assigned_to %}
-            <small class="text-secondary">{{ task.assigned_to.username }}</small>
+            <small class="text-secondary">👤 {{ task.assigned_to.username }}</small>
+            {% else %}
+            <small class="text-secondary">👤 Не назначен</small>
+            {% endif %}
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #71717a;">
+            <span>📅 {{ task.created_at|date:"d.m.Y" }}</span>
+            {% if task.deadline %}
+            <span>⏰ {{ task.deadline|date:"d.m.Y" }}</span>
             {% endif %}
         </div>
     </a>
     {% empty %}
-    <div class="card text-center">
-        <p class="text-secondary">Нет задач</p>
+    <div class="card text-center" style="grid-column: 1/-1;">
+        <p class="text-secondary">📭 Задачи не найдены</p>
+        <p class="text-secondary" style="font-size: 14px; margin-top: 10px;">
+            Попробуйте изменить параметры поиска или фильтрации
+        </p>
+        <a href="{% url 'task_create' %}" class="btn btn-outline" style="margin-top: 15px;">➕ Создать первую задачу</a>
     </div>
     {% endfor %}
 </div>

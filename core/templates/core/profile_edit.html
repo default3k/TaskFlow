@@ -1,0 +1,69 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Редактирование профиля{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto;">
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'profile' %}" class="text-secondary" style="text-decoration: none;">← Назад к профилю</a>
+    </div>
+    
+    <div class="card">
+        <h1 class="card-title" style="margin-bottom: 20px;">Редактирование профиля</h1>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">Имя пользователя</label>
+                <input type="text" class="form-input" value="{{ user.username }}" disabled>
+                <small class="text-secondary">Имя пользователя нельзя изменить</small>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-input" value="{{ user.email }}">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Телефон</label>
+                <input type="text" name="phone" class="form-input" value="{{ user.phone }}">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Должность</label>
+                <input type="text" name="position" class="form-input" value="{{ user.position }}">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Имя</label>
+                <input type="text" name="first_name" class="form-input" value="{{ user.first_name }}">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Фамилия</label>
+                <input type="text" name="last_name" class="form-input" value="{{ user.last_name }}">
+            </div>
+            
+            <hr style="border-color: #27272a; margin: 20px 0;">
+            
+            <h3 style="margin-bottom: 15px;">Смена пароля</h3>
+            
+            <div class="form-group">
+                <label class="form-label">Новый пароль</label>
+                <input type="password" name="new_password" class="form-input" placeholder="Оставьте пустым, чтобы не менять">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Подтверждение пароля</label>
+                <input type="password" name="confirm_password" class="form-input">
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                <a href="{% url 'profile' %}" class="btn btn-outline">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
