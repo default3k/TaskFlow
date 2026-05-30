@@ -17,6 +17,21 @@ import openpyxl
 from openpyxl.styles import Font, Alignment, PatternFill
 
 
+# ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (ДОЛЖНЫ БЫТЬ В НАЧАЛЕ) ==========
+
+def create_notification(user, notification_type, message, link=''):
+    """Создать уведомление для пользователя"""
+    Notification.objects.create(
+        user=user,
+        type=notification_type,
+        message=message,
+        link=link
+    )
+
+
+# ========== ДАЛЕЕ ВСЕ ТВОИ VIEW-ФУНКЦИИ ==========
+# (register, user_login, user_logout, dashboard и т.д.)
+
 def register(request):
     """Регистрация пользователя"""
     if request.method == 'POST':
@@ -738,13 +753,3 @@ def notifications_view(request):
         return redirect('notifications')
     
     return render(request, 'core/notifications.html', {'notifications': notifications})
-
-
-def create_notification(user, notification_type, message, link=''):
-    """Создать уведомление для пользователя"""
-    Notification.objects.create(
-        user=user,
-        type=notification_type,
-        message=message,
-        link=link
-    )
