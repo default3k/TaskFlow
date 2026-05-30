@@ -14,10 +14,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-#l+bb^*2nbfgev8xw91s4!oyg9mnw_ngnpei@4bdn4-&mmhri+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False  # ← ИСПРАВЛЕНО: для продакшена False
+DEBUG = False
 
 # Разрешённые хосты
-ALLOWED_HOSTS = ['*'] # ВРЕМЕННО, потом заменишь на 'domentaskflow.ru', 'www.domentaskflow.ru'
+ALLOWED_HOSTS = ['domentaskflow.ru', 'www.domentaskflow.ru', '127.0.0.1']
 
 
 # Application definition
@@ -63,14 +63,16 @@ TEMPLATES = [
 WSGI_APPLICATION = 'taskflow_project.wsgi.application'
 
 
-# Database
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'u3531913_default',        # имя базы
+        'USER': 'u3531913',                # имя пользователя
+        'PASSWORD': 'B1RLcgQ0BnvG39AA',   # пароль от БД
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
-
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -98,11 +100,11 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = '/www/domentaskflow.ru/'
 
 # Media files (загруженные пользователями файлы)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = '/home/u3531913/domentaskflow.ru/media/'
 
 # User model
 AUTH_USER_MODEL = 'core.User'
@@ -111,3 +113,7 @@ AUTH_USER_MODEL = 'core.User'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = True
