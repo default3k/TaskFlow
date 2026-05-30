@@ -17,12 +17,7 @@ SECRET_KEY = 'django-insecure-#l+bb^*2nbfgev8xw91s4!oyg9mnw_ngnpei@4bdn4-&mmhri+
 DEBUG = False  # ← ИСПРАВЛЕНО: для продакшена False
 
 # Разрешённые хосты
-ALLOWED_HOSTS = [
-    'taskflow-umf3.onrender.com', # <--- Это имя вашего сервиса
-    'localhost',
-    '127.0.0.1',
-
-]  # ВРЕМЕННО, потом заменишь на 'domentaskflow.ru', 'www.domentaskflow.ru'
+ALLOWED_HOSTS = ['*'] # ВРЕМЕННО, потом заменишь на 'domentaskflow.ru', 'www.domentaskflow.ru'
 
 
 # Application definition
