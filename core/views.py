@@ -128,13 +128,25 @@ def company_join_request(request, company_id):
     """Подача заявки на вступление в компанию"""
     company = get_object_or_404(Company, id=company_id)
     
-    # Проверяем, нет ли уже заявки
-    existing_request = CompanyJoinRequest.objects.filter(user=request.user, company=company).first()
+    # Проверяем, есть ли уже ОДОБРЕННАЯ заявка (пользователь уже в компании)
+    approved_exists = CompanyJoinRequest.objects.filter(
+        user=request.user, company=company, status='approved'
+    ).exists()
+    
+    if approved_exists:
+        messages.warning(request, 'Вы уже состоите в этой компании (заявка одобрена)')
+        return redirect('dashboard')
+    
+    # Проверяем, нет ли уже pending заявки
+    existing_request = CompanyJoinRequest.objects.filter(
+        user=request.user, company=company, status='pending'
+    ).first()
+    
     if existing_request:
         messages.warning(request, 'Вы уже подали заявку в эту компанию')
         return redirect('dashboard')
     
-    # Проверяем, не состоит ли пользователь уже в этой компании
+    # Проверяем, не состоит ли пользователь уже в этой компании (на всякий случай)
     if request.user.company == company:
         messages.warning(request, 'Вы уже состоите в этой компании')
         return redirect('dashboard')
@@ -147,9 +159,7 @@ def company_join_request(request, company_id):
             join_request.company = company
             join_request.save()
             
-            # === УВЕДОМЛЕНИЯ ===
-            
-            # 1. Уведомляем владельца компании
+            # Уведомляем владельца компании
             owner = company.get_owner()
             if owner:
                 create_notification(
@@ -159,7 +169,7 @@ def company_join_request(request, company_id):
                     '/company/requests/'
                 )
             
-            # 2. Уведомляем всех администраторов компании
+            # Уведомляем всех администраторов компании
             admins = User.objects.filter(company=company, role='admin')
             for admin in admins:
                 create_notification(
@@ -520,6 +530,13 @@ def company_members(request):
                 member.company = None
                 member.role = 'applicant'
                 member.save()
+
+                create_notification(
+                    member,
+                    'request_rejected',
+                    f'Вас удалили из компании "{company_name}"'
+                )
+                
                 messages.success(request, f'{member.username} удален из компании')
         
         return redirect('company_members')
