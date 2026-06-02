@@ -17,7 +17,7 @@ SECRET_KEY = 'django-insecure-#l+bb^*2nbfgev8xw91s4!oyg9mnw_ngnpei@4bdn4-&mmhri+
 DEBUG = False
 
 # Разрешённые хосты
-ALLOWED_HOSTS = ['domentaskflow.ru', 'www.domentaskflow.ru', '127.0.0.1']
+ALLOWED_HOSTS = ['domentaskflow.ru', 'www.domentaskflow.ru', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -65,12 +65,8 @@ WSGI_APPLICATION = 'taskflow_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'u3531913_default',        # имя базы
-        'USER': 'u3531913',                # имя пользователя
-        'PASSWORD': 'B1RLcgQ0BnvG39AA',   # пароль от БД
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
