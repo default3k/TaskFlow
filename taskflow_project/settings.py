@@ -96,11 +96,11 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATIC_ROOT = '/www/domentaskflow.ru/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files (загруженные пользователями файлы)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/home/u3531913/domentaskflow.ru/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # User model
 AUTH_USER_MODEL = 'core.User'
