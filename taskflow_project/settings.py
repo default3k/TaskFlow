@@ -14,16 +14,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-#l+bb^*2nbfgev8xw91s4!oyg9mnw_ngnpei@4bdn4-&mmhri+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # Разрешённые хосты
-ALLOWED_HOSTS = [
-    'domentaskflow.ru',
-    'www.domentaskflow.ru',
-    'default3k-taskflow-67f2.twc1.net',
-    'localhost',
-    '127.0.0.1',
-]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
