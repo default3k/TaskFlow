@@ -17,7 +17,13 @@ SECRET_KEY = 'django-insecure-#l+bb^*2nbfgev8xw91s4!oyg9mnw_ngnpei@4bdn4-&mmhri+
 DEBUG = False
 
 # Разрешённые хосты
-ALLOWED_HOSTS = ['domentaskflow.ru', 'www.domentaskflow.ru', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'domentaskflow.ru',
+    'www.domentaskflow.ru',
+    'default3k-taskflow-67f2.twc1.net',
+    'localhost',
+    '127.0.0.1',
+]
 
 
 # Application definition
