@@ -19,8 +19,19 @@ DEBUG = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Разрешённые хосты
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'default3k-taskflow-a9a8.twc1.net',
+    'domentaskflow.ru',  # если будешь подключать свой домен
+    'localhost',
+    '127.0.0.1',
+]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://default3k-taskflow-a9a8.twc1.net',
+    'http://default3k-taskflow-a9a8.twc1.net',
+    'https://domentaskflow.ru',  # если будешь подключать
+    'http://localhost:8000',
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -112,6 +123,6 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 SECURE_SSL_REDIRECT = False
