@@ -127,32 +127,42 @@ def company_create(request):
 def company_join_request(request, company_id):
     """Подача заявки на вступление в компанию"""
     company = get_object_or_404(Company, id=company_id)
+    user = request.user
     
     # Если пользователь уже в компании — выходим
-    if request.user.company == company:
+    if user.company == company:
         messages.warning(request, 'Вы уже состоите в этой компании')
         return redirect('dashboard')
     
-    # Проверяем, есть ли уже одобренная заявка
+    # Проверяем, есть ли одобренная заявка
     approved = CompanyJoinRequest.objects.filter(
-        user=request.user, company=company, status='approved'
+        user=user, company=company, status='approved'
     ).first()
+    
+    # Если пользователь был удален из компании, старая одобренная заявка должна быть удалена
+    # Проверяем: если есть approved, но user.company != company, значит его удалили
+    if approved and user.company != company:
+        # Удаляем старую одобренную заявку, чтобы можно было подать новую
+        approved.delete()
+        approved = None
+        messages.info(request, 'Вы можете подать новую заявку в компанию')
+    
+    # Если есть активная одобренная заявка (значит пользователь все еще в компании)
     if approved:
-        messages.warning(request, 'Вы уже состоите в этой компании (заявка одобрена)')
+        messages.warning(request, 'Вы уже состоите в этой компании')
         return redirect('dashboard')
     
-    # Если есть отклонённая заявка — удаляем её (чтобы можно было подать новую)
+    # Если есть отклонённая заявка — удаляем её
     rejected = CompanyJoinRequest.objects.filter(
-        user=request.user, company=company, status='rejected'
+        user=user, company=company, status='rejected'
     ).first()
     if rejected:
         rejected.delete()
         messages.info(request, 'Старая отклонённая заявка удалена. Можете подать новую.')
-        # Не делаем redirect, а продолжаем — пользователь сразу увидит форму
     
     # Проверяем, нет ли уже pending заявки
     pending = CompanyJoinRequest.objects.filter(
-        user=request.user, company=company, status='pending'
+        user=user, company=company, status='pending'
     ).first()
     if pending:
         messages.warning(request, 'Вы уже подали заявку в эту компанию (ожидает рассмотрения)')
@@ -162,7 +172,7 @@ def company_join_request(request, company_id):
         form = CompanyJoinRequestForm(request.POST)
         if form.is_valid():
             join_request = form.save(commit=False)
-            join_request.user = request.user
+            join_request.user = user
             join_request.company = company
             join_request.save()
             
@@ -172,7 +182,7 @@ def company_join_request(request, company_id):
                 create_notification(
                     owner,
                     'request_approved',
-                    f'📝 Новая заявка! {request.user.username} хочет вступить в компанию "{company.name}"',
+                    f'📝 Новая заявка! {user.username} хочет вступить в компанию "{company.name}"',
                     '/company/requests/'
                 )
             admins = User.objects.filter(company=company, role='admin')
@@ -180,7 +190,7 @@ def company_join_request(request, company_id):
                 create_notification(
                     admin,
                     'request_approved',
-                    f'📝 Новая заявка! {request.user.username} хочет вступить в компанию "{company.name}"',
+                    f'📝 Новая заявка! {user.username} хочет вступить в компанию "{company.name}"',
                     '/company/requests/'
                 )
             
