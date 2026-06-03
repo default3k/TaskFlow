@@ -16,6 +16,8 @@ SECRET_KEY = 'django-insecure-#l+bb^*2nbfgev8xw91s4!oyg9mnw_ngnpei@4bdn4-&mmhri+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 # Разрешённые хосты
 ALLOWED_HOSTS = ['*']
 
@@ -112,4 +114,4 @@ LOGOUT_REDIRECT_URL = '/login/'
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False
