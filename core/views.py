@@ -545,6 +545,13 @@ def company_members(request):
                 company = request.user.company
                 company_name = company.name
                 
+                # Удаляем одобренную заявку пользователя
+                CompanyJoinRequest.objects.filter(
+                    user=member, 
+                    company=company, 
+                    status='approved'
+                ).delete()
+                
                 member.company = None
                 member.role = 'applicant'
                 member.save()
