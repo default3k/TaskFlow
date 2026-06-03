@@ -532,6 +532,9 @@ def company_members(request):
             if member.role == 'owner':
                 messages.error(request, 'Нельзя удалить владельца компании')
             else:
+                company = request.user.company
+                company_name = company.name
+                
                 member.company = None
                 member.role = 'applicant'
                 member.save()
