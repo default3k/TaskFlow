@@ -424,10 +424,23 @@
                 border-radius: 6px;
                 text-align: center;
                 font-size: 1rem;
+                white-space: normal;
             }
             
             .nav-menu a:hover {
                 background: #1e1e26;
+            }
+            
+            /* Уведомления на мобилках */
+            .nav-menu a[href*="notifications"] {
+                position: relative;
+                display: block !important;
+            }
+            
+            .nav-menu a[href*="notifications"] span {
+                position: absolute;
+                top: 5px;
+                right: 10px;
             }
             
             .dropdown {
@@ -495,18 +508,8 @@
             }
             
             .form-input, .form-textarea, .form-select {
-                font-size: 16px; /* Предотвращает зум на iOS */
+                font-size: 16px;
                 padding: 12px;
-            }
-            
-            /* Уведомления на мобилках */
-            .nav-menu a[href*="notifications"] {
-                position: relative;
-            }
-            
-            .nav-menu a[href*="notifications"] span {
-                top: 5px !important;
-                right: 5px !important;
             }
         }
         
@@ -575,14 +578,17 @@
                 <a href="{% url 'company_requests_manage' %}">📨 Заявки</a>
                 {% endif %}
                 {% endif %}
-                <a href="{% url 'notifications' %}" style="position: relative; display: block;">
+                
+                <!-- Уведомления - отдельная ссылка -->
+                <a href="{% url 'notifications' %}" style="position: relative; display: inline-block; white-space: nowrap;">
                     🔔 Уведомления
                     {% if unread_count > 0 %}
-                    <span style="position: absolute; top: 5px; right: 5px; background: #ef4444; color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 10px;">
+                    <span style="position: absolute; top: -8px; right: -15px; background: #ef4444; color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center; line-height: 1.2;">
                         {{ unread_count }}
                     </span>
                     {% endif %}
                 </a>
+                
                 <div class="dropdown" id="userDropdown">
                     <a href="#" class="dropdown-toggle" onclick="toggleDropdown(event)">
                         👤 {{ user.username }}
@@ -624,7 +630,6 @@
                 menu.classList.toggle('active');
             });
             
-            // Закрываем меню при клике вне
             document.addEventListener('click', function(e) {
                 if (!menu.contains(e.target) && !toggle.contains(e.target)) {
                     menu.classList.remove('active');
@@ -641,7 +646,6 @@
             }
         }
         
-        // Закрываем дропдаун при клике вне
         document.addEventListener('click', function(e) {
             if (window.innerWidth <= 768) {
                 const dropdowns = document.querySelectorAll('.dropdown');
