@@ -4,40 +4,132 @@
 
 {% block content %}
 <div style="max-width: 800px; margin: 0 auto;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h1>🔔 Уведомления</h1>
-        <form method="post">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+        <h1 style="font-size: 1.5rem; margin: 0;">🔔 Уведомления</h1>
+        <form method="post" style="width: auto;">
             {% csrf_token %}
-            <button type="submit" name="mark_all_read" class="btn btn-outline btn-sm">Отметить все прочитанными</button>
+            <button type="submit" name="mark_all_read" class="btn btn-outline btn-sm" style="white-space: nowrap;">
+                ✅ Все прочитаны
+            </button>
         </form>
     </div>
     
     <div class="card">
         {% if notifications %}
             {% for notif in notifications %}
-            <div style="padding: 15px; border-bottom: 1px solid #27272a; {% if not notif.is_read %}background: rgba(59,130,246,0.05);{% endif %}">
-                <div style="display: flex; justify-content: space-between; align-items: start;">
-                    <div>
-                        <div style="font-weight: {% if not notif.is_read %}bold{% endif %}; margin-bottom: 5px;">
+            <div style="padding: 15px; border-bottom: 1px solid #27272a; {% if not notif.is_read %}background: rgba(59,130,246,0.05); border-left: 3px solid #3b82f6;{% endif %}">
+                <div style="display: flex; justify-content: space-between; align-items: start; gap: 10px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 100px;">
+                        <div style="font-weight: {% if not notif.is_read %}bold{% endif %}; margin-bottom: 5px; word-break: break-word; font-size: 0.95rem;">
+                            {% if notif.type == 'task_assigned' %}📌
+                            {% elif notif.type == 'task_status_changed' %}🔄
+                            {% elif notif.type == 'task_comment' %}💬
+                            {% elif notif.type == 'request_approved' %}✅
+                            {% elif notif.type == 'request_rejected' %}❌
+                            {% endif %}
                             {{ notif.message }}
                         </div>
-                        <small class="text-secondary">{{ notif.created_at|date:"d.m.Y H:i" }}</small>
+                        <small class="text-secondary" style="font-size: 0.75rem;">{{ notif.created_at|date:"d.m.Y H:i" }}</small>
+                        {% if notif.link %}
+                        <div style="margin-top: 8px;">
+                            <a href="{{ notif.link }}" class="btn btn-outline btn-sm" style="font-size: 0.7rem;">📎 Перейти</a>
+                        </div>
+                        {% endif %}
                     </div>
                     {% if not notif.is_read %}
-                    <form method="post" style="display: inline;">
+                    <form method="post" style="display: inline; flex-shrink: 0;">
                         {% csrf_token %}
                         <input type="hidden" name="mark_read" value="{{ notif.id }}">
-                        <button type="submit" class="btn btn-outline btn-sm">Прочитано</button>
+                        <button type="submit" class="btn btn-outline btn-sm" style="padding: 4px 12px; font-size: 0.7rem;">✔️ Прочитано</button>
                     </form>
                     {% endif %}
                 </div>
-                {% if notif.link %}
-                {% endif %}
             </div>
             {% endfor %}
+            
+            <!-- Счетчик непрочитанных -->
+            <div style="padding: 12px 15px; background: #1e1e26; border-radius: 8px; margin-top: 10px; text-align: center;">
+                <span class="text-secondary" style="font-size: 0.85rem;">
+                    {% with unread=notifications|length|add:0 %}
+                        {% with unread_count=notifications|length %}
+                            {% if unread_count > 0 %}
+                                Непрочитанных: <strong style="color: #3b82f6;">{{ unread_count }}</strong>
+                            {% else %}
+                                ✅ Все уведомления прочитаны
+                            {% endif %}
+                        {% endwith %}
+                    {% endwith %}
+                </span>
+            </div>
         {% else %}
-            <p class="text-secondary" style="text-align: center; padding: 40px;">У вас нет уведомлений</p>
+            <div style="text-align: center; padding: 60px 20px;">
+                <div style="font-size: 4rem; margin-bottom: 15px;">🔕</div>
+                <p class="text-secondary" style="font-size: 1.1rem;">У вас нет уведомлений</p>
+                <p style="color: #71717a; font-size: 0.9rem; margin-top: 8px;">Здесь будут появляться уведомления о задачах и заявках</p>
+            </div>
         {% endif %}
     </div>
 </div>
+
+<!-- Мобильная адаптация -->
+<style>
+@media (max-width: 768px) {
+    .notifications-container {
+        padding: 0 10px;
+    }
+    
+    .notifications-container h1 {
+        font-size: 1.2rem !important;
+    }
+    
+    .notifications-container .card {
+        padding: 10px !important;
+    }
+    
+    .notifications-container .card > div {
+        padding: 12px !important;
+    }
+    
+    .notifications-container .card > div > div {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+    
+    .notifications-container .card > div > div > div:first-child {
+        margin-bottom: 8px;
+    }
+    
+    .notifications-container .card > div > div > form {
+        align-self: flex-end;
+    }
+    
+    .notifications-container .card > div > div > form button {
+        width: 100%;
+    }
+    
+    .notifications-container .card > div:last-child {
+        font-size: 0.8rem;
+        padding: 10px !important;
+    }
+    
+    .notifications-container .btn-outline.btn-sm {
+        padding: 6px 14px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .notifications-container h1 {
+        font-size: 1rem !important;
+    }
+    
+    .notifications-container .card > div > div > div:first-child {
+        font-size: 0.9rem;
+    }
+    
+    .notifications-container .card > div > div > div:first-child small {
+        font-size: 0.65rem;
+    }
+}
+</style>
 {% endblock %}
