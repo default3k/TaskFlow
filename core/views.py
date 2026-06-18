@@ -795,3 +795,61 @@ def notifications_view(request):
         return redirect('notifications')
     
     return render(request, 'core/notifications.html', {'notifications': notifications})
+
+@login_required
+def profile_view_public(request, user_id):
+    """Просмотр профиля другого пользователя (для админов и владельцев)"""
+    viewer = request.user
+    
+    # Проверяем, что смотрящий состоит в компании
+    if not viewer.company:
+        messages.error(request, 'Вы не состоите в компании')
+        return redirect('dashboard')
+    
+    # Получаем целевого пользователя
+    target_user = get_object_or_404(User, id=user_id)
+    
+    # Проверяем, что целевой пользователь в той же компании
+    if target_user.company != viewer.company:
+        messages.error(request, 'Этот пользователь не состоит в вашей компании')
+        return redirect('dashboard')
+    
+    # Права на просмотр: только админ или владелец могут смотреть чужие профили
+    if not viewer.can_manage_company():
+        # Обычный пользователь может смотреть только свой профиль
+        if viewer.id != target_user.id:
+            messages.error(request, 'У вас нет прав на просмотр профилей других сотрудников')
+            return redirect('dashboard')
+    
+    # Собираем статистику по задачам пользователя
+    my_tasks = Task.objects.filter(company=viewer.company, assigned_to=target_user)
+    tasks_total = my_tasks.count()
+    tasks_done = my_tasks.filter(status='done').count()
+    tasks_in_progress = my_tasks.filter(status='in_progress').count()
+    tasks_review = my_tasks.filter(status='review').count()
+    tasks_waiting = my_tasks.filter(status='waiting').count()
+    
+    # Вычисляем общее время
+    total_time = 0
+    for task in my_tasks.filter(status='done'):
+        time_spent = task.get_time_spent()
+        if time_spent:
+            total_time += time_spent
+    
+    # Получаем последние задачи пользователя
+    recent_tasks = my_tasks.order_by('-created_at')[:5]
+    
+    context = {
+        'profile_user': target_user,
+        'tasks_total': tasks_total,
+        'tasks_done': tasks_done,
+        'tasks_in_progress': tasks_in_progress,
+        'tasks_review': tasks_review,
+        'tasks_waiting': tasks_waiting,
+        'total_time': round(total_time, 1),
+        'recent_tasks': recent_tasks,
+        'is_own_profile': (viewer.id == target_user.id),
+        'can_manage': viewer.can_manage_company(),
+    }
+    
+    return render(request, 'core/profile_public.html', context)

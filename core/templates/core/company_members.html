@@ -9,7 +9,7 @@
 
 <div class="card" style="margin-bottom: 20px;">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <h1 style="margin: 0;">{{ user.company.name }}</h1>
+        <h1 style="margin: 0; font-size: 1.5rem;">{{ user.company.name }}</h1>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <a href="{% url 'company_edit' %}" class="btn btn-outline">✏️ Редактировать</a>
             {% if user.can_manage_company %}
@@ -31,9 +31,11 @@
         
         {% for member in members %}
         <div style="padding: 15px; border-bottom: 1px solid #27272a;">
-            <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 10px;">
                 <div>
-                    <strong>{{ member.username }}</strong>
+                    <a href="{% url 'profile_public' member.id %}" style="color: white; text-decoration: none; font-weight: bold; font-size: 1.05rem; transition: 0.2s;" onmouseover="this.style.color='#3b82f6';" onmouseout="this.style.color='white';">
+                        {{ member.username }}
+                    </a>
                     <div style="font-size: 12px; color: #a1a1aa; margin-top: 4px;">
                         {{ member.get_role_display }}
                         {% if member.position %} | {{ member.position }}{% endif %}
@@ -42,30 +44,31 @@
                         Email: {{ member.email }} | Вступил: {{ member.joined_at|date:"d.m.Y" }}
                     </div>
                 </div>
-                <div>
+                <div style="display: flex; flex-wrap: wrap; gap: 5px;">
                     {% if user.can_manage_roles and member != user %}
                     <form method="post" style="display: inline-block;">
                         {% csrf_token %}
                         <input type="hidden" name="member_id" value="{{ member.id }}">
-                        <select name="new_role" onchange="this.form.submit()" class="form-select" style="width: auto; display: inline-block; margin-right: 5px;">
+                        <input type="hidden" name="action" value="change_role">
+                        <select name="new_role" onchange="this.form.submit()" class="form-select" style="width: auto; display: inline-block; padding: 4px 8px; font-size: 0.75rem; background: #1e1e26; border: 1px solid #27272a; border-radius: 4px; color: white;">
                             <option value="admin" {% if member.role == 'admin' %}selected{% endif %}>Админ</option>
                             <option value="manager" {% if member.role == 'manager' %}selected{% endif %}>Менеджер</option>
                             <option value="developer" {% if member.role == 'developer' %}selected{% endif %}>Разработчик</option>
                             <option value="designer" {% if member.role == 'designer' %}selected{% endif %}>Дизайнер</option>
                             <option value="tester" {% if member.role == 'tester' %}selected{% endif %}>Тестировщик</option>
                         </select>
-                        <input type="hidden" name="action" value="change_role">
                     </form>
                     
                     <form method="post" style="display: inline-block;">
                         {% csrf_token %}
                         <input type="hidden" name="member_id" value="{{ member.id }}">
                         <input type="hidden" name="action" value="remove_member">
-                        <button type="submit" class="btn btn-outline btn-sm" style="background: rgba(239, 68, 68, 0.1); border-color: #ef4444; color: #ef4444;" onclick="return confirm('Удалить {{ member.username }} из компании?')">
-                            Удалить
+                        <button type="submit" class="btn btn-outline btn-sm" style="background: rgba(239, 68, 68, 0.1); border-color: #ef4444; color: #ef4444; padding: 4px 10px;" onclick="return confirm('Удалить {{ member.username }} из компании?')">
+                            🗑️
                         </button>
                     </form>
                     {% endif %}
+                    <a href="{% url 'profile_public' member.id %}" class="btn btn-outline btn-sm" style="padding: 4px 10px;">👤</a>
                 </div>
             </div>
         </div>
@@ -85,7 +88,9 @@
         {% for request in pending_requests %}
         <div style="padding: 15px; border-bottom: 1px solid #27272a;">
             <div>
-                <strong>{{ request.user.username }}</strong>
+                <a href="{% url 'profile_public' request.user.id %}" style="color: white; text-decoration: none; font-weight: bold; transition: 0.2s;" onmouseover="this.style.color='#3b82f6';" onmouseout="this.style.color='white';">
+                    {{ request.user.username }}
+                </a>
                 <div style="font-size: 12px; color: #a1a1aa; margin-top: 4px;">
                     Email: {{ request.user.email }}
                 </div>
@@ -99,13 +104,14 @@
                     {{ request.message }}
                 </div>
                 {% endif %}
-                <div style="margin-top: 10px;">
+                <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 5px;">
                     <form method="post" action="{% url 'company_requests_manage' %}" style="display: inline;">
                         {% csrf_token %}
                         <input type="hidden" name="request_id" value="{{ request.id }}">
                         <button type="submit" name="action" value="approve" class="btn btn-primary btn-sm">✅ Принять</button>
                         <button type="submit" name="action" value="reject" class="btn btn-outline btn-sm">❌ Отклонить</button>
                     </form>
+                    <a href="{% url 'profile_public' request.user.id %}" class="btn btn-outline btn-sm">👤 Профиль</a>
                 </div>
             </div>
         </div>
@@ -116,4 +122,61 @@
         {% endfor %}
     </div>
 </div>
+
+<!-- Мобильная адаптация -->
+<style>
+@media (max-width: 768px) {
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+    
+    .card h1 {
+        font-size: 1.2rem;
+    }
+    
+    .card .card-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .card .card-header .card-title {
+        font-size: 1rem;
+    }
+    
+    /* Сотрудники на мобилках */
+    #members-list > div {
+        padding: 12px;
+    }
+    
+    #members-list > div > div {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    #members-list > div > div > div:last-child {
+        margin-top: 10px;
+        justify-content: flex-start;
+    }
+    
+    .form-select[style*="width: auto"] {
+        width: 100% !important;
+        margin-right: 0 !important;
+        margin-bottom: 5px;
+    }
+    
+    /* Заявки на мобилках */
+    #requests-list > div > div > div:last-child {
+        flex-direction: column;
+    }
+    
+    #requests-list > div > div > div:last-child form {
+        width: 100%;
+    }
+    
+    #requests-list > div > div > div:last-child form button {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+}
+</style>
 {% endblock %}

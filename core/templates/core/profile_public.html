@@ -1,0 +1,145 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Профиль {{ profile_user.username }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">
+            👤 {{ profile_user.username }}
+            {% if profile_user.role == 'owner' %}
+            <span class="status-badge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">⭐ Владелец</span>
+            {% elif profile_user.role == 'admin' %}
+            <span class="status-badge" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;">🔧 Администратор</span>
+            {% elif profile_user.role == 'manager' %}
+            <span class="status-badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;">📊 Менеджер</span>
+            {% else %}
+            <span class="status-badge" style="background: rgba(113, 113, 122, 0.2); color: #a1a1aa;">{{ profile_user.get_role_display }}</span>
+            {% endif %}
+        </h2>
+        {% if is_own_profile %}
+        <a href="{% url 'profile_edit' %}" class="btn btn-outline btn-sm">✏️ Редактировать</a>
+        {% endif %}
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <div>
+            <div style="font-size: 12px; color: #a1a1aa;">👤 Полное имя</div>
+            <div style="font-weight: 500;">
+                {% if profile_user.first_name or profile_user.last_name %}
+                    {{ profile_user.first_name }} {{ profile_user.last_name }}
+                {% else %}
+                    <span class="text-secondary">Не указано</span>
+                {% endif %}
+            </div>
+        </div>
+        <div>
+            <div style="font-size: 12px; color: #a1a1aa;">📧 Email</div>
+            <div style="font-weight: 500;">{{ profile_user.email }}</div>
+        </div>
+        <div>
+            <div style="font-size: 12px; color: #a1a1aa;">📱 Телефон</div>
+            <div style="font-weight: 500;">
+                {% if profile_user.phone %}
+                    {{ profile_user.phone }}
+                {% else %}
+                    <span class="text-secondary">Не указан</span>
+                {% endif %}
+            </div>
+        </div>
+        <div>
+            <div style="font-size: 12px; color: #a1a1aa;">💼 Должность</div>
+            <div style="font-weight: 500;">
+                {% if profile_user.position %}
+                    {{ profile_user.position }}
+                {% else %}
+                    <span class="text-secondary">Не указана</span>
+                {% endif %}
+            </div>
+        </div>
+        <div>
+            <div style="font-size: 12px; color: #a1a1aa;">🏢 Компания</div>
+            <div style="font-weight: 500;">{{ profile_user.company.name }}</div>
+        </div>
+        <div>
+            <div style="font-size: 12px; color: #a1a1aa;">📅 В компании с</div>
+            <div style="font-weight: 500;">{{ profile_user.joined_at|date:"d.m.Y" }}</div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #27272a;">
+        <h3 style="margin-bottom: 15px;">📊 Статистика задач</h3>
+        <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));">
+            <div class="stat-card">
+                <div class="stat-value">{{ tasks_total|default:0 }}</div>
+                <div class="stat-label">Всего задач</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color: #3b82f6;">{{ tasks_in_progress|default:0 }}</div>
+                <div class="stat-label">В работе</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color: #8b5cf6;">{{ tasks_review|default:0 }}</div>
+                <div class="stat-label">На проверке</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color: #10b981;">{{ tasks_done|default:0 }}</div>
+                <div class="stat-label">Выполнено</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color: #6b7280;">{{ tasks_waiting|default:0 }}</div>
+                <div class="stat-label">Ожидают</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color: #f59e0b;">{{ total_time|default:0 }}ч</div>
+                <div class="stat-label">Затрачено времени</div>
+            </div>
+        </div>
+    </div>
+    
+    {% if recent_tasks %}
+    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #27272a;">
+        <h3 style="margin-bottom: 15px;">📋 Последние задачи</h3>
+        {% for task in recent_tasks %}
+        <a href="{% url 'task_detail' task.id %}" class="task-card" style="margin-bottom: 10px; display: block;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div style="flex: 1;">
+                    <strong>{{ task.title }}</strong>
+                    <div style="font-size: 12px; color: #a1a1aa; margin-top: 4px;">
+                        {{ task.created_at|date:"d.m.Y" }}
+                        {% if task.project %}
+                        · {{ task.project.name }}
+                        {% endif %}
+                    </div>
+                </div>
+                <span class="status-badge status-{{ task.status }}">{{ task.get_status_display }}</span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    {% if can_manage and not is_own_profile %}
+    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #27272a;">
+        <h3 style="margin-bottom: 15px;">⚙️ Управление</h3>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="{% url 'company_members' %}" class="btn btn-outline">👥 Вернуться к сотрудникам</a>
+            {% if profile_user.role != 'owner' %}
+            <button onclick="if(confirm('Вы уверены, что хотите удалить {{ profile_user.username }} из компании?')) { document.getElementById('removeForm').submit(); }" class="btn btn-danger">
+                🗑️ Удалить из компании
+            </button>
+            <form id="removeForm" method="post" action="{% url 'company_members' %}" style="display: none;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="remove_member">
+                <input type="hidden" name="member_id" value="{{ profile_user.id }}">
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div style="margin-top: 15px;">
+    <a href="{% url 'dashboard' %}" class="btn btn-outline">← На дашборд</a>
+</div>
+{% endblock %}

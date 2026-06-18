@@ -8,36 +8,48 @@
 </div>
 
 <div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
-        <h1>{{ task.title }}</h1>
-        <span class="priority-{{ task.priority }} status-badge" style="padding: 6px 12px;">{{ task.get_priority_display }}</span>
+    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+        <h1 style="font-size: 1.5rem; word-break: break-word;">{{ task.title }}</h1>
+        <span class="priority-{{ task.priority }} status-badge" style="padding: 6px 12px; white-space: nowrap;">{{ task.get_priority_display }}</span>
     </div>
     
     {% if task.description %}
     <div style="margin-bottom: 20px;">
         <h3 style="font-size: 14px; color: #a1a1aa; margin-bottom: 8px;">Описание</h3>
-        <p>{{ task.description }}</p>
+        <p style="word-break: break-word;">{{ task.description }}</p>
     </div>
     {% endif %}
     
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; padding-top: 20px; border-top: 1px solid #27272a;">
         <div>
             <div style="font-size: 12px; color: #a1a1aa;">Статус</div>
-            <div class="status-badge status-{{ task.status }}" style="margin-top: 4px;">{{ task.get_status_display }}</div>
+            <div class="status-badge status-{{ task.status }}" style="margin-top: 4px; display: inline-block;">{{ task.get_status_display }}</div>
         </div>
         <div>
             <div style="font-size: 12px; color: #a1a1aa;">Исполнитель</div>
-            <div style="margin-top: 4px;">{{ task.assigned_to.username|default:"Не назначен" }}</div>
+            <div style="margin-top: 4px;">
+                {% if task.assigned_to %}
+                <a href="{% url 'profile_public' task.assigned_to.id %}" style="color: #3b82f6; text-decoration: none; transition: 0.2s;" onmouseover="this.style.color='#60a5fa';" onmouseout="this.style.color='#3b82f6';">
+                    {{ task.assigned_to.username }}
+                </a>
+                {% else %}
+                <span class="text-secondary">Не назначен</span>
+                {% endif %}
+            </div>
         </div>
         <div>
             <div style="font-size: 12px; color: #a1a1aa;">Создал</div>
-            <div style="margin-top: 4px;">{{ task.created_by.username }}</div>
+            <div style="margin-top: 4px;">
+                <a href="{% url 'profile_public' task.created_by.id %}" style="color: #3b82f6; text-decoration: none; transition: 0.2s;" onmouseover="this.style.color='#60a5fa';" onmouseout="this.style.color='#3b82f6';">
+                    {{ task.created_by.username }}
+                </a>
+            </div>
         </div>
         {% if task.project %}
         <div>
             <div style="font-size: 12px; color: #a1a1aa;">Проект</div>
             <div style="margin-top: 4px;">
-                <a href="{% url 'project_detail' task.project.id %}" style="color: #3b82f6;">{{ task.project.name }}</a>
+                <a href="{% url 'project_detail' task.project.id %}" style="color: #3b82f6; text-decoration: none;">{{ task.project.name }}</a>
             </div>
         </div>
         {% endif %}
@@ -85,7 +97,7 @@
     <form method="post" action="{% url 'task_update_status' task.id %}" style="margin-bottom: 0;">
         {% csrf_token %}
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <select name="status" class="form-select" style="flex: 1;">
+            <select name="status" class="form-select" style="flex: 1; min-width: 150px;">
                 <option value="waiting" {% if task.status == 'waiting' %}selected{% endif %}>⏳ Ожидает</option>
                 <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>🔄 В работе</option>
                 <option value="review" {% if task.status == 'review' %}selected{% endif %}>👀 На проверке</option>
@@ -116,14 +128,62 @@
     <!-- Список комментариев -->
     {% for comment in comments %}
     <div style="padding: 12px; border-bottom: 1px solid #27272a;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-            <strong style="color: #3b82f6;">{{ comment.author.username }}</strong>
+        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 5px; margin-bottom: 5px;">
+            <a href="{% url 'profile_public' comment.author.id %}" style="color: #3b82f6; text-decoration: none; font-weight: bold; transition: 0.2s;" onmouseover="this.style.color='#60a5fa';" onmouseout="this.style.color='#3b82f6';">
+                {{ comment.author.username }}
+            </a>
             <small class="text-secondary">{{ comment.created_at|date:"d.m.Y H:i" }}</small>
         </div>
-        <div style="font-size: 14px;">{{ comment.text|linebreaks }}</div>
+        <div style="font-size: 14px; word-break: break-word;">{{ comment.text|linebreaks }}</div>
     </div>
     {% empty %}
     <p class="text-secondary" style="text-align: center; padding: 20px;">Нет комментариев. Будьте первым!</p>
     {% endfor %}
 </div>
+
+<!-- Мобильная адаптация -->
+<style>
+@media (max-width: 768px) {
+    .card h1 {
+        font-size: 1.2rem;
+    }
+    
+    .card > div:first-child {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .card > div:first-child h1 {
+        margin-bottom: 10px;
+    }
+    
+    /* Статус изменения */
+    .card:has(form) form > div {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .card:has(form) form > div select {
+        width: 100% !important;
+        margin-bottom: 10px;
+    }
+    
+    .card:has(form) form > div button {
+        width: 100%;
+    }
+    
+    /* Комментарии */
+    .card:last-child form textarea {
+        min-height: 80px;
+    }
+    
+    .card:last-child form button {
+        width: 100%;
+    }
+    
+    .card:last-child > div {
+        padding: 10px;
+    }
+}
+</style>
 {% endblock %}
