@@ -374,16 +374,31 @@ def tasks_list(request):
     if project_filter:
         tasks = tasks.filter(project_id=project_filter)
     
-    # СОРТИРОВКА
+    # СОРТИРОВКА - УНИВЕРСАЛЬНЫЙ ВАРИАНТ ДЛЯ ЛЮБОЙ БД
     sort_by = request.GET.get('sort', '-created_at')
     
-    # Обработка сортировки по сроку (с учетом NULL)
+    from django.db.models import Case, When, Value, IntegerField
+    
     if sort_by == 'deadline':
-        # Сначала NULL, потом даты (дальние сначала)
-        tasks = tasks.order_by(models.F('deadline').asc(nulls_first=True))
+        # Срок (дальние сначала): сначала NULL, потом даты по возрастанию
+        tasks = tasks.annotate(
+            deadline_order=Case(
+                When(deadline__isnull=True, then=Value(1)),
+                default=Value(0),
+                output_field=IntegerField()
+            )
+        ).order_by('deadline_order', 'deadline')
+        
     elif sort_by == '-deadline':
-        # Сначала даты (ближайшие), потом NULL
-        tasks = tasks.order_by(models.F('deadline').asc(nulls_last=True))
+        # Срок (ближайшие сначала): сначала даты по возрастанию, потом NULL
+        tasks = tasks.annotate(
+            deadline_order=Case(
+                When(deadline__isnull=False, then=Value(0)),
+                default=Value(1),
+                output_field=IntegerField()
+            )
+        ).order_by('deadline_order', 'deadline')
+        
     else:
         # Обычная сортировка
         allowed_sorts = ['title', '-title', 'created_at', '-created_at', 
