@@ -335,18 +335,19 @@
         .status-approved { background: rgba(16, 185, 129, 0.2); color: #10b981; }
         .status-rejected { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
         
+        /* Приоритеты - унифицированные бейджи */
         .priority-high, 
         .priority-medium, 
         .priority-low {
             display: inline-block;
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 4px;
             font-size: 0.75rem;
             font-weight: 500;
-            line-height: 1.2;
+            line-height: 1.4;
             white-space: nowrap;
-            min-width: auto;
-            max-width: 100%;
+            min-width: 54px;
+            text-align: center;
         }
 
         .priority-high { 
@@ -364,13 +365,6 @@
             color: #10b981; 
         }
 
-        /* Для совместимости с .status-badge */
-        .status-badge.priority-high,
-        .status-badge.priority-medium,
-        .status-badge.priority-low {
-            padding: 4px 10px;
-            font-size: 0.75rem;
-        }
 
 
         /* Сообщения */
