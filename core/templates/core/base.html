@@ -335,10 +335,44 @@
         .status-approved { background: rgba(16, 185, 129, 0.2); color: #10b981; }
         .status-rejected { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
         
-        .priority-high { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-        .priority-medium { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-        .priority-low { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-        
+        .priority-high, 
+        .priority-medium, 
+        .priority-low {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            line-height: 1.2;
+            white-space: nowrap;
+            min-width: auto;
+            max-width: 100%;
+        }
+
+        .priority-high { 
+            background: rgba(239, 68, 68, 0.2); 
+            color: #ef4444; 
+        }
+
+        .priority-medium { 
+            background: rgba(245, 158, 11, 0.2); 
+            color: #f59e0b; 
+        }
+
+        .priority-low { 
+            background: rgba(16, 185, 129, 0.2); 
+            color: #10b981; 
+        }
+
+        /* Для совместимости с .status-badge */
+        .status-badge.priority-high,
+        .status-badge.priority-medium,
+        .status-badge.priority-low {
+            padding: 4px 10px;
+            font-size: 0.75rem;
+        }
+
+
         /* Сообщения */
         .alert {
             padding: 12px 15px;
