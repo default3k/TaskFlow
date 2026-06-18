@@ -376,13 +376,22 @@ def tasks_list(request):
     
     # СОРТИРОВКА
     sort_by = request.GET.get('sort', '-created_at')
-    allowed_sorts = ['title', '-title', 'created_at', '-created_at', 
-                     'deadline', '-deadline', 'priority', '-priority',
-                     'status', '-status']
-    if sort_by in allowed_sorts:
-        tasks = tasks.order_by(sort_by)
+    
+    # Обработка сортировки по сроку (с учетом NULL)
+    if sort_by == 'deadline':
+        # Сначала NULL, потом даты (дальние сначала)
+        tasks = tasks.order_by(models.F('deadline').asc(nulls_first=True))
+    elif sort_by == '-deadline':
+        # Сначала даты (ближайшие), потом NULL
+        tasks = tasks.order_by(models.F('deadline').asc(nulls_last=True))
     else:
-        tasks = tasks.order_by('-created_at')
+        # Обычная сортировка
+        allowed_sorts = ['title', '-title', 'created_at', '-created_at', 
+                         'priority', '-priority', 'status', '-status']
+        if sort_by in allowed_sorts:
+            tasks = tasks.order_by(sort_by)
+        else:
+            tasks = tasks.order_by('-created_at')
     
     projects = Project.objects.filter(company=request.user.company)
     
@@ -398,7 +407,6 @@ def tasks_list(request):
     }
     
     return render(request, 'core/tasks_list.html', context)
-
 
 @login_required
 def task_detail(request, task_id):
